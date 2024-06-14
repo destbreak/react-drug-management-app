@@ -6,17 +6,19 @@ const TransactionList = ({ transactions }) => {
     <TableContainer>
       <Table>
         <TableHead>
-          <TableCell>No</TableCell>
-          <TableCell>Tanggal</TableCell>
-          <TableCell>Depo Asal</TableCell>
-          <TableCell>Depo Tujuan</TableCell>
-          <TableCell>Keterangan</TableCell>
-          <TableCell>Total Harga</TableCell>
-          <TableCell></TableCell>
+          <TableRow>
+            <TableCell>No</TableCell>
+            <TableCell>Tanggal</TableCell>
+            <TableCell>Depo Asal</TableCell>
+            <TableCell>Depo Tujuan</TableCell>
+            <TableCell>Keterangan</TableCell>
+            <TableCell>Total Harga</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
         </TableHead>
         <TableBody>
           {transactions.map((transaction) => (
-            <TableRow>
+            <TableRow key={transaction.id}>
               <TableCell>{transaction.id}</TableCell>
               <TableCell>{transaction.date}</TableCell>
               <TableCell>{transaction.depoOrigin}</TableCell>
