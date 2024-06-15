@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import { Paper } from "@mui/material";
 import TransactionList from "./components/TransactionList";
+import TransactionForm from "./components/TransactionForm";
 
 function App() {
   const [transactions, setTransactions] = useState([
@@ -31,9 +32,49 @@ function App() {
     },
   ]);
 
+  const [transactionItems, setTransactionItems] = useState([
+    {
+      transactionId: 1,
+      id: "00000001",
+      name: "AMOXSAN CAPS 500 MG (R)",
+      unit: "CAPSUL",
+      qty: 10,
+      price: 3020,
+      totalPrice: 30200,
+    },
+    {
+      transactionId: 1,
+      id: "00000003",
+      name: "ZYPRAZ TAB 0.5 MG (Alprazolam))",
+      unit: "TABLET",
+      qty: 10,
+      price: 2404,
+      totalPrice: 24040,
+    },
+  ]);
+
+  const addTransaction = (id, date, depoOrigin, depoDestination, description, totalPrice) => {
+    const newTransaction = {
+      id: id,
+      date: date,
+      depoOrigin: depoOrigin,
+      depoDestination: depoDestination,
+      description: description,
+      totalPrice: totalPrice,
+    };
+
+    const updatedTransactions = transactions.concat(newTransaction);
+    setTransactions(updatedTransactions);
+  };
+
   return (
     <Paper>
       <h1>Daftar Perpindahan Obat</h1>
+      <TransactionForm
+        transactions={transactions}
+        transactionItems={transactionItems}
+        addTransaction={addTransaction}
+      />
       <TransactionList transactions={transactions} />
     </Paper>
   );
