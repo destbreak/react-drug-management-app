@@ -48,7 +48,7 @@ const drugs = [
   },
 ];
 
-const DrugForm = ({transactionId, addTransactionItem}) => {
+const DrugForm = ({ transactionId, addTransactionItem }) => {
   const [inputValue, setInputValue] = useState("");
 
   const [id, setId] = useState("");
@@ -59,7 +59,6 @@ const DrugForm = ({transactionId, addTransactionItem}) => {
   const totalPrice = qty * price;
 
   const handleChangeQty = (event) => {
-
     setQty(parseInt(event.target.value));
   };
 
@@ -74,7 +73,7 @@ const DrugForm = ({transactionId, addTransactionItem}) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    addTransactionItem(transactionId, id, name, unit, qty, price, totalPrice)
+    addTransactionItem(transactionId, id, name, unit, qty, price, totalPrice);
   };
 
   return (
@@ -116,7 +115,7 @@ const DrugForm = ({transactionId, addTransactionItem}) => {
                         <TableCell>{drug.unit}</TableCell>
                         <TableCell>
                           <TextField
-                            inputProps={{readOnly: readOnlyText}}
+                            inputProps={{ readOnly: readOnlyText }}
                             value={qty}
                             onChange={(event) => {
                               handleChangeQty(event);

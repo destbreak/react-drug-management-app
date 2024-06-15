@@ -35,7 +35,7 @@ function App() {
   const [transactionItems, setTransactionItems] = useState([
     {
       transactionId: 1,
-      id: "00000001",
+      id: 1,
       name: "AMOXSAN CAPS 500 MG (R)",
       unit: "CAPSUL",
       qty: 10,
@@ -44,12 +44,39 @@ function App() {
     },
     {
       transactionId: 1,
-      id: "00000003",
+      id: 3,
       name: "ZYPRAZ TAB 0.5 MG (Alprazolam))",
       unit: "TABLET",
       qty: 10,
       price: 2404,
       totalPrice: 24040,
+    },
+    {
+      transactionId: 2,
+      id: 7,
+      name: "ZYLORIC TAB 300 MG (Allopurinol)",
+      unit: "TABLET",
+      qty: 10,
+      price: 4854,
+      totalPrice: 48540,
+    },
+    {
+      transactionId: 3,
+      id: 16,
+      name: "NUFAPREG TAB (prometazine)",
+      unit: "TABLET",
+      qty: 10,
+      price: 2860,
+      totalPrice: 28600,
+    },
+    {
+      transactionId: 3,
+      id: 21,
+      name: "NUTRIBREAST TAB",
+      unit: "TABLET",
+      qty: 10,
+      price: 7799,
+      totalPrice: 77990,
     },
   ]);
 
@@ -67,6 +94,13 @@ function App() {
     setTransactions(updatedTransactions);
   };
 
+  const deleteTransaction = (id) => {
+    const updatedTransactions = transactions.filter((transaction) => {
+      return transaction.id !== id;
+    });
+    setTransactions(updatedTransactions);
+  };
+
   const addTransactionItem = (transactionId, id, name, unit, qty, price, totalPrice) => {
     const newTransactionItem = {
       transactionId: transactionId,
@@ -76,11 +110,11 @@ function App() {
       qty: qty,
       price: price,
       totalPrice: totalPrice,
-    }
+    };
 
     const updatedTransactionItems = transactionItems.concat(newTransactionItem);
     setTransactionItems(updatedTransactionItems);
-  }
+  };
 
   return (
     <Paper>
@@ -91,7 +125,11 @@ function App() {
         addTransaction={addTransaction}
         addTransactionItem={addTransactionItem}
       />
-      <TransactionList transactions={transactions} />
+      <TransactionList
+        transactions={transactions}
+        transactionItems={transactionItems}
+        deleteTransaction={deleteTransaction}
+      />
     </Paper>
   );
 }
