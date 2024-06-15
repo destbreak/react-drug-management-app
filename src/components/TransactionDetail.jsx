@@ -1,9 +1,7 @@
 import { React, useState } from "react";
 import {
-  Autocomplete,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
@@ -17,6 +15,8 @@ import {
 } from "@mui/material";
 
 const TransactionDetail = ({ id, transactions, transactionItems }) => {
+  let idr = Intl.NumberFormat("id-ID");
+
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -67,7 +67,6 @@ const TransactionDetail = ({ id, transactions, transactionItems }) => {
                   <TableCell>Qty</TableCell>
                   <TableCell>Harga</TableCell>
                   <TableCell>Total</TableCell>
-                  <TableCell></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -79,8 +78,8 @@ const TransactionDetail = ({ id, transactions, transactionItems }) => {
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.unit}</TableCell>
                         <TableCell>{item.qty}</TableCell>
-                        <TableCell>{item.price}</TableCell>
-                        <TableCell>{item.totalPrice}</TableCell>
+                        <TableCell>{idr.format(item.price)}</TableCell>
+                        <TableCell>{idr.format(item.totalPrice)}</TableCell>
                       </TableRow>
                     );
                   }

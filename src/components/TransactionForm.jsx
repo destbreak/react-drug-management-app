@@ -15,6 +15,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DrugForm from "./DrugForm";
 
 const depos = [
@@ -36,7 +37,15 @@ const depos = [
   },
 ];
 
-const TransactionForm = ({ transactions, transactionItems, addTransaction, addTransactionItem }) => {
+const TransactionForm = ({
+  transactions,
+  transactionItems,
+  addTransaction,
+  addTransactionItem,
+  deleteTransactionItem,
+}) => {
+  let idr = Intl.NumberFormat("id-ID");
+
   const currentDate = new Date();
   const currentTransaction = `${currentDate.getDate()}/${
     currentDate.getMonth() + 1
@@ -47,7 +56,7 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction, addTr
   const [depoOrigin, setDepoOrigin] = useState("");
   const [depoDestination, setDepoDestination] = useState("");
   const [description, setDescription] = useState("");
-  const totalPrice = "";
+  let totalPrice = 0;
 
   const handleChangeDescription = (event) => {
     setDescription(event.target.value);
@@ -64,7 +73,7 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction, addTr
 
   return (
     <>
-      {console.log(transactionItems)}
+      {/* {console.log(transactionItems)} */}
       <Button variant="contained" onClick={handleOpen}>
         Buat Transaksi
       </Button>
@@ -130,14 +139,21 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction, addTr
               <TableBody>
                 {transactionItems.map((item) => {
                   if (item.transactionId === id) {
+                    totalPrice = totalPrice + item.totalPrice;
+                    // console.log(totalPrice);
                     return (
                       <TableRow key={item.id}>
                         <TableCell>{item.id}</TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.unit}</TableCell>
                         <TableCell>{item.qty}</TableCell>
-                        <TableCell>{item.price}</TableCell>
-                        <TableCell>{item.totalPrice}</TableCell>
+                        <TableCell>{idr.format(item.price)}</TableCell>
+                        <TableCell>{idr.format(item.totalPrice)}</TableCell>
+                        <TableCell>
+                          <Button onClick={() => deleteTransactionItem(item.id)}>
+                            <DeleteIcon />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     );
                   }
@@ -147,7 +163,7 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction, addTr
           </TableContainer>
           <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
         </DialogContent>
-        <DialogActions>
+        <DialogActions style={{ justifyContent: "space-between" }}>
           <Button
             variant="contained"
             onClick={(event) => {
@@ -156,6 +172,7 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction, addTr
             }}>
             Simpan Transaksi
           </Button>
+          <TextField value={idr.format(totalPrice)} label="Total" />
         </DialogActions>
       </Dialog>
     </>
