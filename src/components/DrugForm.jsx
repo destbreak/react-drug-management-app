@@ -49,12 +49,14 @@ const drugs = [
 ];
 
 const DrugForm = ({ transactionId, addTransactionItem }) => {
+  let idr = Intl.NumberFormat("id-ID");
+
   const [inputValue, setInputValue] = useState("");
 
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
-  const [qty, setQty] = useState("");
+  const [qty, setQty] = useState(1);
   const [price, setPrice] = useState("");
   const totalPrice = qty * price;
 
@@ -102,6 +104,7 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                   <TableCell>Satuan</TableCell>
                   <TableCell>Qty</TableCell>
                   <TableCell>Harga</TableCell>
+                  <TableCell>Total</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableHead>
@@ -115,7 +118,8 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                         <TableCell>{drug.unit}</TableCell>
                         <TableCell>
                           <TextField
-                            inputProps={{ readOnly: readOnlyText }}
+                            type="number"
+                            InputProps={{ inputProps: { min: 1 }, readOnly: readOnlyText }}
                             value={qty}
                             onChange={(event) => {
                               handleChangeQty(event);
@@ -123,7 +127,8 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                             label="Banyak Barang"
                           />
                         </TableCell>
-                        <TableCell>{drug.price}</TableCell>
+                        <TableCell>{idr.format(drug.price)}</TableCell>
+                        <TableCell>{idr.format(qty * drug.price)}</TableCell>
                         <TableCell>
                           {showButton && (
                             <Button
@@ -154,7 +159,7 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
             onClick={(event) => {
               handleSubmit(event);
               setInputValue("");
-              setQty("");
+              setQty(1);
               toggleButton();
               toggleReadOnlyText();
               handleClose();

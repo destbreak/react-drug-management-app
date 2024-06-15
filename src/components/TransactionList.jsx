@@ -4,6 +4,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import TransactionDetail from "./TransactionDetail";
 
 const TransactionList = ({ transactions, transactionItems, deleteTransaction }) => {
+  let idr = Intl.NumberFormat("id-ID");
+
   return (
     <TableContainer>
       <Table>
@@ -26,7 +28,7 @@ const TransactionList = ({ transactions, transactionItems, deleteTransaction }) 
               <TableCell>{transaction.depoOrigin}</TableCell>
               <TableCell>{transaction.depoDestination}</TableCell>
               <TableCell>{transaction.description}</TableCell>
-              <TableCell>{transaction.totalPrice}</TableCell>
+              <TableCell>{idr.format(transaction.totalPrice)}</TableCell>
               <TableCell>
                 <TransactionDetail
                   id={transaction.id}

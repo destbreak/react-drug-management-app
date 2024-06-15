@@ -116,6 +116,13 @@ function App() {
     setTransactionItems(updatedTransactionItems);
   };
 
+  const deleteTransactionItem = (itemId) => {
+    const updatedTransactionItems = transactionItems.filter((item) => {
+      return item.id !== itemId;
+    });
+    setTransactionItems(updatedTransactionItems);
+  };
+
   return (
     <Paper>
       <h1>Daftar Perpindahan Obat</h1>
@@ -124,6 +131,7 @@ function App() {
         transactionItems={transactionItems}
         addTransaction={addTransaction}
         addTransactionItem={addTransactionItem}
+        deleteTransactionItem={deleteTransactionItem}
       />
       <TransactionList
         transactions={transactions}
