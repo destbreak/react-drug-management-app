@@ -67,6 +67,21 @@ function App() {
     setTransactions(updatedTransactions);
   };
 
+  const addTransactionItem = (transactionId, id, name, unit, qty, price, totalPrice) => {
+    const newTransactionItem = {
+      transactionId: transactionId,
+      id: id,
+      name: name,
+      unit: unit,
+      qty: qty,
+      price: price,
+      totalPrice: totalPrice,
+    }
+
+    const updatedTransactionItems = transactionItems.concat(newTransactionItem);
+    setTransactionItems(updatedTransactionItems);
+  }
+
   return (
     <Paper>
       <h1>Daftar Perpindahan Obat</h1>
@@ -74,6 +89,7 @@ function App() {
         transactions={transactions}
         transactionItems={transactionItems}
         addTransaction={addTransaction}
+        addTransactionItem={addTransactionItem}
       />
       <TransactionList transactions={transactions} />
     </Paper>

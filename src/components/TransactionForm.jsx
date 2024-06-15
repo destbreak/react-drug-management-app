@@ -15,6 +15,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import DrugForm from "./DrugForm";
 
 const depos = [
   {
@@ -35,7 +36,7 @@ const depos = [
   },
 ];
 
-const TransactionForm = ({ transactions, transactionItems, addTransaction }) => {
+const TransactionForm = ({ transactions, transactionItems, addTransaction, addTransactionItem }) => {
   const currentDate = new Date();
   const currentTransaction = `${currentDate.getDate()}/${
     currentDate.getMonth() + 1
@@ -48,19 +49,13 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction }) => 
   const [description, setDescription] = useState("");
   const totalPrice = "";
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleChangeDepoOrigin = (event) => {
-    setDepoOrigin(event.target.value);
-  };
-  const handleChangeDepoDestination = (event) => {
-    setDepoDestination(event.target.value);
-  };
   const handleChangeDescription = (event) => {
     setDescription(event.target.value);
   };
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -69,6 +64,7 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction }) => 
 
   return (
     <>
+      {console.log(transactionItems)}
       <Button variant="contained" onClick={handleOpen}>
         Buat Transaksi
       </Button>
@@ -149,9 +145,11 @@ const TransactionForm = ({ transactions, transactionItems, addTransaction }) => 
               </TableBody>
             </Table>
           </TableContainer>
+          <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             onClick={(event) => {
               handleSubmit(event);
               handleClose();
