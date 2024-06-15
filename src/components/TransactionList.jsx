@@ -1,7 +1,9 @@
 import React from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import TransactionDetail from "./TransactionDetail";
 
-const TransactionList = ({ transactions }) => {
+const TransactionList = ({ transactions, transactionItems, deleteTransaction }) => {
   return (
     <TableContainer>
       <Table>
@@ -25,6 +27,16 @@ const TransactionList = ({ transactions }) => {
               <TableCell>{transaction.depoDestination}</TableCell>
               <TableCell>{transaction.description}</TableCell>
               <TableCell>{transaction.totalPrice}</TableCell>
+              <TableCell>
+                <TransactionDetail
+                  id={transaction.id}
+                  transactions={transactions}
+                  transactionItems={transactionItems}
+                />
+                <Button onClick={() => deleteTransaction(transaction.id)}>
+                  <DeleteIcon />
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
