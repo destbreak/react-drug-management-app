@@ -1,4 +1,5 @@
-import { React, useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Autocomplete,
   Button,
@@ -18,62 +19,126 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import DrugForm from "./DrugForm";
 
-const depos = [
-  {
-    id: 1,
-    name: "Gudang Farmasi",
-  },
-  {
-    id: 2,
-    name: "Farmasi Rawat Jalan",
-  },
-  {
-    id: 3,
-    name: "Farmasi Rawat Inap",
-  },
-  {
-    id: 4,
-    name: "Farmasi IGD",
-  },
-];
-
-const TransactionForm = ({
-  transactions,
-  transactionItems,
-  addTransaction,
-  addTransactionItem,
-  deleteTransactionItem,
-}) => {
+const TransactionForm = () => {
   let idr = Intl.NumberFormat("id-ID");
 
   const currentDate = new Date();
-  const currentTransaction = `${currentDate.getDate()}/${
-    currentDate.getMonth() + 1
-  }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
+  const currentTransaction =
+    currentDate.getFullYear() +
+    "-" +
+    ("00" + (currentDate.getMonth() + 1)).slice(-2) +
+    "-" +
+    ("00" + currentDate.getDate()).slice(-2) +
+    " " +
+    ("00" + currentDate.getHours()).slice(-2) +
+    ":" +
+    ("00" + currentDate.getMinutes()).slice(-2) +
+    ":" +
+    ("00" + currentDate.getSeconds()).slice(-2);
 
-  const id = transactions.length + 1;
   const date = currentTransaction;
   const [depoOrigin, setDepoOrigin] = useState("");
   const [depoDestination, setDepoDestination] = useState("");
   const [description, setDescription] = useState("");
   let totalPrice = 0;
 
-  const handleChangeDescription = (event) => {
-    setDescription(event.target.value);
+  const [transactions, setTransactions] = useState([]);
+  const id = transactions.length + 1;
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/transactions")
+      .then((res) => {
+        setTransactions(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
+
+  const [transactionItems, setTransactionItems] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/items")
+      .then((res) => {
+        setTransactionItems(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
+
+  const [depos, setDepos] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/depos")
+      .then((res) => {
+        setDepos(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
+
+  const addTransactionItem = (transactionId, code, name, unit, qty, price, totalPrice) => {
+    axios
+      .post("http://localhost:3001/api/items", {
+        transactionId,
+        code,
+        name,
+        unit,
+        qty,
+        price,
+        totalPrice,
+      })
+      .then((res) => {
+        setTransactionItems([...transactionItems, res.data]);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  };
+
+  const handleDeleteItem = (code) => {
+    axios
+      .delete(`http://localhost:3001/api/items/${code}`)
+      .then(() => {
+        setTransactionItems(transactionItems.filter((item) => item.code !== code));
+      })
+      .catch((error) => {
+        console.error("There was an error deleting the data!", error);
+      });
+  };
+
+  const handleAddTransactions = () => {
+    axios
+      .post("http://localhost:3001/api/transactions", {
+        id,
+        date,
+        depoOrigin,
+        depoDestination,
+        description,
+        totalPrice,
+      })
+      .then((res) => {
+        setTransactions([...transactions, res.data]);
+        setDepoOrigin("");
+        setDepoDestination("");
+        setDescription("");
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+
+    handleClose();
+    window.location.reload();
   };
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    addTransaction(id, date, depoOrigin, depoDestination, description, totalPrice);
-  };
-
   return (
     <>
-      {/* {console.log(transactionItems)} */}
       <Button variant="contained" onClick={handleOpen}>
         Buat Transaksi
       </Button>
@@ -117,7 +182,7 @@ const TransactionForm = ({
                 fullWidth
                 value={description}
                 onChange={(event) => {
-                  handleChangeDescription(event);
+                  setDescription(event.target.value);
                 }}
                 label="Contoh: Penyimpanan Obat"
               />
@@ -140,17 +205,16 @@ const TransactionForm = ({
                 {transactionItems.map((item) => {
                   if (item.transactionId === id) {
                     totalPrice = totalPrice + item.totalPrice;
-                    // console.log(totalPrice);
                     return (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.id}</TableCell>
+                      <TableRow key={item.code}>
+                        <TableCell>{item.code}</TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.unit}</TableCell>
                         <TableCell>{item.qty}</TableCell>
                         <TableCell>{idr.format(item.price)}</TableCell>
                         <TableCell>{idr.format(item.totalPrice)}</TableCell>
                         <TableCell>
-                          <Button onClick={() => deleteTransactionItem(item.id)}>
+                          <Button onClick={() => handleDeleteItem(item.code)}>
                             <DeleteIcon />
                           </Button>
                         </TableCell>
@@ -164,12 +228,7 @@ const TransactionForm = ({
           <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
         </DialogContent>
         <DialogActions style={{ justifyContent: "space-between" }}>
-          <Button
-            variant="contained"
-            onClick={(event) => {
-              handleSubmit(event);
-              handleClose();
-            }}>
+          <Button variant="contained" onClick={handleAddTransactions}>
             Simpan Transaksi
           </Button>
           <TextField value={idr.format(totalPrice)} label="Total" />
