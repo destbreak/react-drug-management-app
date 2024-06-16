@@ -35,8 +35,8 @@ const TransactionForm = () => {
     ("00" + currentDate.getMinutes()).slice(-2) +
     ":" +
     ("00" + currentDate.getSeconds()).slice(-2);
-
   const date = currentTransaction;
+
   const [depoOrigin, setDepoOrigin] = useState("");
   const [depoDestination, setDepoDestination] = useState("");
   const [description, setDescription] = useState("");
@@ -145,6 +145,7 @@ const TransactionForm = () => {
       <Dialog fullWidth maxWidth="xl" open={open} onClose={handleClose}>
         <DialogTitle>{"Form Perpindahan Obat"}</DialogTitle>
         <DialogContent>
+          <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <p>Nomor</p>
@@ -225,9 +226,8 @@ const TransactionForm = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
         </DialogContent>
-        <DialogActions style={{ justifyContent: "space-between" }}>
+        <DialogActions style={styles.dialogActions}>
           <Button variant="contained" onClick={handleAddTransactions}>
             Simpan Transaksi
           </Button>
@@ -236,6 +236,12 @@ const TransactionForm = () => {
       </Dialog>
     </>
   );
+};
+
+const styles = {
+  dialogActions: {
+    justifyContent: "space-between",
+  },
 };
 
 export default TransactionForm;

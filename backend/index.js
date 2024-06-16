@@ -22,6 +22,10 @@ db.connect((err) => {
   console.log("Connected to MySQL");
 });
 
+app.get("/", (req, res) => {
+  res.send("Berhasil terhubung ke Drug Management App - DestBreak");
+});
+
 app.get("/api/transactions", (req, res) => {
   const sql = "SELECT * FROM transactions";
   db.query(sql, (err, results) => {

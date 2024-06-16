@@ -5,12 +5,24 @@ import TransactionList from "./components/TransactionList";
 
 function App() {
   return (
-    <Paper>
-      <h1>Daftar Perpindahan Obat</h1>
+    <Paper style={styles.container}>
+      <h1 style={styles.title}>Daftar Perpindahan Obat</h1>
       <TransactionForm />
       <TransactionList />
     </Paper>
   );
 }
+
+const styles = {
+  container: {
+    margin: "16px 0 32px 0",
+    padding: "32px",
+  },
+  title: {
+    margin: "0",
+    marginBottom: "16px",
+    textAlign: "center",
+  },
+};
 
 export default App;
