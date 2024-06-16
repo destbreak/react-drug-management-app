@@ -133,7 +133,7 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
             </Table>
           </TableContainer>
         </DialogContent>
-        <DialogActions>
+        <DialogActions style={styles.dialogActions}>
           <Button
             variant="contained"
             onClick={(event) => {
@@ -150,6 +150,12 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
       </Dialog>
     </>
   );
+};
+
+const styles = {
+  dialogActions: {
+    justifyContent: "flex-start",
+  },
 };
 
 export default DrugForm;
