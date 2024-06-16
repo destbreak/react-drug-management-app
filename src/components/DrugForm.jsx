@@ -1,4 +1,5 @@
-import { React, useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Autocomplete,
   Button,
@@ -15,45 +16,24 @@ import {
   TextField,
 } from "@mui/material";
 
-const drugs = [
-  {
-    id: 1,
-    name: "AMOXSAN CAPS 500 MG (R)",
-    unit: "CAPSUL",
-    price: 3020,
-  },
-  {
-    id: 3,
-    name: "ZYPRAZ TAB 0.5 MG (Alprazolam))",
-    unit: "TABLET",
-    price: 2404,
-  },
-  {
-    id: 7,
-    name: "ZYLORIC TAB 300 MG (Allopurinol)",
-    unit: "TABLET",
-    price: 4854,
-  },
-  {
-    id: 16,
-    name: "NUFAPREG TAB (prometazine)",
-    unit: "TABLET",
-    price: 2860,
-  },
-  {
-    id: 21,
-    name: "NUTRIBREAST TAB",
-    unit: "TABLET",
-    price: 7799,
-  },
-];
-
 const DrugForm = ({ transactionId, addTransactionItem }) => {
   let idr = Intl.NumberFormat("id-ID");
 
   const [inputValue, setInputValue] = useState("");
 
-  const [id, setId] = useState("");
+  const [drugs, setDrugs] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/drugs")
+      .then((res) => {
+        setDrugs(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
+
+  const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
   const [qty, setQty] = useState(1);
@@ -75,7 +55,7 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    addTransactionItem(transactionId, id, name, unit, qty, price, totalPrice);
+    addTransactionItem(transactionId, code, name, unit, qty, price, totalPrice);
   };
 
   return (
@@ -134,7 +114,7 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                             <Button
                               variant="contained"
                               onClick={() => {
-                                setId(drug.id);
+                                setCode(drug.id);
                                 setName(drug.name);
                                 setUnit(drug.unit);
                                 setPrice(drug.price);

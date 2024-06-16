@@ -1,4 +1,5 @@
-import { React, useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Button,
   Dialog,
@@ -14,8 +15,32 @@ import {
   TextField,
 } from "@mui/material";
 
-const TransactionDetail = ({ id, transactions, transactionItems }) => {
+const TransactionDetail = ({ id }) => {
   let idr = Intl.NumberFormat("id-ID");
+
+  const [transactions, setTransactions] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/transactions")
+      .then((res) => {
+        setTransactions(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
+
+  const [transactionItems, setTransactionItems] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/api/items")
+      .then((res) => {
+        setTransactionItems(res.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the data!", error);
+      });
+  }, []);
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -73,8 +98,8 @@ const TransactionDetail = ({ id, transactions, transactionItems }) => {
                 {transactionItems.map((item) => {
                   if (item.transactionId === id) {
                     return (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.id}</TableCell>
+                      <TableRow key={item.code}>
+                        <TableCell>{item.code}</TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.unit}</TableCell>
                         <TableCell>{item.qty}</TableCell>
