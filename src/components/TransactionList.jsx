@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { supabase } from "../../backend/supabaseClient";
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TransactionDetail from "./TransactionDetail";
@@ -7,38 +7,35 @@ import TransactionDetail from "./TransactionDetail";
 const TransactionList = () => {
   let idr = Intl.NumberFormat("id-ID");
 
-  const [transactions, setTransactions] = useState([]);
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/transactions")
-      .then((res) => {
-        setTransactions(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
+    fetchTransactions();
+    fetchTransactionItems();
   }, []);
 
-  const handleDeleteTransaction = (id) => {
-    axios
-      .delete(`http://localhost:3001/api/transactions/${id}`)
-      .then(() => {
-        setTransactions(transactions.filter((transaction) => transaction.id !== id));
-      })
-      .catch((error) => {
-        console.error("There was an error deleting the data!", error);
-      });
+  const [transactions, setTransactions] = useState([]);
+  const fetchTransactions = async () => {
+    const { data, error } = await supabase.from("transactions").select("*");
+    if (error) console.log(error);
+    else setTransactions(data);
   };
 
-  const handleDeleteItem = (id) => {
-    axios
-      .delete(`http://localhost:3001/api/items/${id}`)
-      .then(() => {
-        setTransactionItems(transactionItems.filter((item) => item.transactionId !== id));
-      })
-      .catch((error) => {
-        console.error("There was an error deleting the data!", error);
-      });
+  const [transactionItems, setTransactionItems] = useState([]);
+  const fetchTransactionItems = async () => {
+    const { data, error } = await supabase.from("items").select("*");
+    if (error) console.log(error);
+    else setTransactionItems(data);
+  };
+
+  const handleDeleteTransaction = async (id) => {
+    const { error } = await supabase.from("transactions").delete().eq("id", id);
+    if (error) console.log(error);
+    else fetchTransactions();
+  };
+
+  const handleDeleteItem = async (id) => {
+    const { error } = await supabase.from("items").delete().eq("transactionId", id);
+    if (error) console.log(error);
+    else fetchTransactionItems();
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { supabase } from "../../backend/supabaseClient";
 import {
   Autocomplete,
   Button,
@@ -21,17 +21,16 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
 
   const [inputValue, setInputValue] = useState("");
 
-  const [drugs, setDrugs] = useState([]);
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/drugs")
-      .then((res) => {
-        setDrugs(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
+    fetchDrugs();
   }, []);
+
+  const [drugs, setDrugs] = useState([]);
+  const fetchDrugs = async () => {
+    const { data, error } = await supabase.from("drugs").select("*");
+    if (error) console.log(error);
+    else setDrugs(data);
+  };
 
   const [code, setCode] = useState("");
   const [name, setName] = useState("");

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { supabase } from "../../backend/supabaseClient";
 import {
   Autocomplete,
   Button,
@@ -42,46 +42,37 @@ const TransactionForm = () => {
   const [description, setDescription] = useState("");
   let totalPrice = 0;
 
+  useEffect(() => {
+    fetchTransactions();
+    fetchTransactionItems();
+    fetchDepos();
+  }, []);
+
   const [transactions, setTransactions] = useState([]);
   const id = transactions.length + 1;
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/transactions")
-      .then((res) => {
-        setTransactions(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
+  const fetchTransactions = async () => {
+    const { data, error } = await supabase.from("transactions").select("*");
+    if (error) console.log(error);
+    else setTransactions(data);
+  };
 
   const [transactionItems, setTransactionItems] = useState([]);
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/items")
-      .then((res) => {
-        setTransactionItems(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
+  const fetchTransactionItems = async () => {
+    const { data, error } = await supabase.from("items").select("*");
+    if (error) console.log(error);
+    else setTransactionItems(data);
+  };
 
   const [depos, setDepos] = useState([]);
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/depos")
-      .then((res) => {
-        setDepos(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
+  const fetchDepos = async () => {
+    const { data, error } = await supabase.from("depos").select("*");
+    if (error) console.log(error);
+    else setDepos(data);
+  };
 
-  const addTransactionItem = (transactionId, code, name, unit, qty, price, totalPrice) => {
-    axios
-      .post("http://localhost:3001/api/items", {
+  const addTransactionItem = async (transactionId, code, name, unit, qty, price, totalPrice) => {
+    const { data, error } = await supabase.from("items").insert([
+      {
         transactionId,
         code,
         name,
@@ -89,45 +80,41 @@ const TransactionForm = () => {
         qty,
         price,
         totalPrice,
-      })
-      .then((res) => {
-        setTransactionItems([...transactionItems, res.data]);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
+      },
+    ]);
+    if (error) console.log(error);
+    else {
+      fetchTransactionItems();
+    }
   };
+  
+  const handleDeleteItem = async (code) => {
+    const { error } = await supabase
+    .from('items')
+    .delete()
+    .eq('code', code)
+    if (error) console.log(error);
+    else fetchTransactionItems();
+  }
 
-  const handleDeleteItem = (code) => {
-    axios
-      .delete(`http://localhost:3001/api/items/${code}`)
-      .then(() => {
-        setTransactionItems(transactionItems.filter((item) => item.code !== code));
-      })
-      .catch((error) => {
-        console.error("There was an error deleting the data!", error);
-      });
-  };
-
-  const handleAddTransactions = () => {
-    axios
-      .post("http://localhost:3001/api/transactions", {
+  const handleAddTransactions = async () => {
+    const { data, error } = await supabase.from("transactions").insert([
+      {
         id,
         date,
         depoOrigin,
         depoDestination,
         description,
         totalPrice,
-      })
-      .then((res) => {
-        setTransactions([...transactions, res.data]);
-        setDepoOrigin("");
-        setDepoDestination("");
-        setDescription("");
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
+      },
+    ]);
+    if (error) console.log(error);
+    else {
+      setDepoOrigin("");
+      setDepoDestination("");
+      setDescription("");
+      fetchTransactions();
+    }
 
     handleClose();
     window.location.reload();

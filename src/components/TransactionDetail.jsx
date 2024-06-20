@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { supabase } from "../../backend/supabaseClient";
 import {
   Button,
   Dialog,
@@ -18,29 +18,24 @@ import {
 const TransactionDetail = ({ id }) => {
   let idr = Intl.NumberFormat("id-ID");
 
-  const [transactions, setTransactions] = useState([]);
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/transactions")
-      .then((res) => {
-        setTransactions(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
+    fetchTransactions();
+    fetchTransactionItems();
   }, []);
 
+  const [transactions, setTransactions] = useState([]);
+  const fetchTransactions = async () => {
+    const { data, error } = await supabase.from("transactions").select("*");
+    if (error) console.log(error);
+    else setTransactions(data);
+  };
+
   const [transactionItems, setTransactionItems] = useState([]);
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/api/items")
-      .then((res) => {
-        setTransactionItems(res.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
+  const fetchTransactionItems = async () => {
+    const { data, error } = await supabase.from("items").select("*");
+    if (error) console.log(error);
+    else setTransactionItems(data);
+  };
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
