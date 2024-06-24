@@ -7,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -15,46 +16,65 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const DrugForm = ({ transactionId, addTransactionItem }) => {
   let idr = Intl.NumberFormat("id-ID");
 
   const [inputValue, setInputValue] = useState("");
+  const [drugs, setDrugs] = useState([]);
+  const [selectedDrugs, setSelectedDrugs] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [qty, setQty] = useState(1);
 
   useEffect(() => {
     fetchDrugs();
   }, []);
 
-  const [drugs, setDrugs] = useState([]);
   const fetchDrugs = async () => {
     const { data, error } = await supabase.from("drugs").select("*");
     if (error) console.log(error);
     else setDrugs(data);
   };
 
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [unit, setUnit] = useState("");
-  const [qty, setQty] = useState(1);
-  const [price, setPrice] = useState("");
-  const totalPrice = qty * price;
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    if (selectedDrugs.length > 0) {
+      const confirmClose = window.confirm(
+        "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin menutup dialog?"
+      );
+      if (confirmClose) {
+        setOpen(false);
+        setInputValue("");
+        setQty(1);
+        setSelectedDrugs([]);
+      }
+    } else {
+      setOpen(false);
+      setInputValue("");
+      setQty(1);
+    }
+  };
+
+  const handleAddDrug = (drug, qty) => {
+    const totalPrice = qty * drug.price;
+    setSelectedDrugs([...selectedDrugs, { ...drug, qty, totalPrice }]);
+    setInputValue("");
+    setQty(1);
+  };
+
+  const handleSaveDrugs = () => {
+    selectedDrugs.forEach((drug) => {
+      const { id, name, unit, qty, price, totalPrice } = drug;
+      addTransactionItem(transactionId, id, name, unit, qty, price, totalPrice);
+    });
+    setOpen(false);
+    setSelectedDrugs([]);
+    alert("Obat berhasil disimpan");
+  };
 
   const handleChangeQty = (event) => {
     setQty(parseInt(event.target.value));
-  };
-
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const [showButton, setShowButton] = useState(true);
-  const [readOnlyText, setReadOnlyText] = useState(false);
-  const toggleButton = () => setShowButton(!showButton);
-  const toggleReadOnlyText = () => setReadOnlyText(!readOnlyText);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    addTransactionItem(transactionId, code, name, unit, qty, price, totalPrice);
   };
 
   return (
@@ -63,7 +83,12 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
         Tambah Obat
       </Button>
       <Dialog fullWidth maxWidth="l" open={open} onClose={handleClose}>
-        <DialogTitle>{"Daftar Obat"}</DialogTitle>
+        <DialogTitle>
+          {"Daftar Obat"}
+          <IconButton aria-label="close" onClick={handleClose} style={{ position: "absolute", right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           <Autocomplete
             freeSolo
@@ -98,51 +123,39 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                         <TableCell>
                           <TextField
                             type="number"
-                            InputProps={{ inputProps: { min: 1 }, readOnly: readOnlyText }}
+                            InputProps={{ inputProps: { min: 1 } }}
                             value={qty}
-                            onChange={(event) => {
-                              handleChangeQty(event);
-                            }}
+                            onChange={handleChangeQty}
                             label="Banyak Barang"
                           />
                         </TableCell>
                         <TableCell>{idr.format(drug.price)}</TableCell>
                         <TableCell>{idr.format(qty * drug.price)}</TableCell>
                         <TableCell>
-                          {showButton && (
-                            <Button
-                              variant="contained"
-                              onClick={() => {
-                                setCode(drug.id);
-                                setName(drug.name);
-                                setUnit(drug.unit);
-                                setPrice(drug.price);
-                                toggleButton();
-                                toggleReadOnlyText();
-                              }}>
-                              Tambah Obat
-                            </Button>
-                          )}
+                          <Button variant="contained" onClick={() => handleAddDrug(drug, qty)}>
+                            Tambah Obat
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
                   }
                 })}
+                {selectedDrugs.map((drug, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{drug.id}</TableCell>
+                    <TableCell>{drug.name}</TableCell>
+                    <TableCell>{drug.unit}</TableCell>
+                    <TableCell>{drug.qty}</TableCell>
+                    <TableCell>{idr.format(drug.price)}</TableCell>
+                    <TableCell>{idr.format(drug.totalPrice)}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         </DialogContent>
         <DialogActions style={styles.dialogActions}>
-          <Button
-            variant="contained"
-            onClick={(event) => {
-              handleSubmit(event);
-              setInputValue("");
-              setQty(1);
-              toggleButton();
-              toggleReadOnlyText();
-              handleClose();
-            }}>
+          <Button variant="contained" onClick={handleSaveDrugs}>
             Simpan Obat
           </Button>
         </DialogActions>
