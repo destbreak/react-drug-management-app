@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -16,11 +17,12 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DrugForm from "./DrugForm";
 
 const TransactionForm = () => {
-  let idr = Intl.NumberFormat("id-ID");
+  const idr = Intl.NumberFormat("id-ID");
 
   const currentDate = new Date();
   const currentTransaction =
@@ -40,11 +42,10 @@ const TransactionForm = () => {
   const [depoOrigin, setDepoOrigin] = useState("");
   const [depoDestination, setDepoDestination] = useState("");
   const [description, setDescription] = useState("");
-  let totalPrice = 0;
+  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     fetchTransactions();
-    fetchTransactionItems();
     fetchDepos();
   }, []);
 
@@ -57,11 +58,6 @@ const TransactionForm = () => {
   };
 
   const [transactionItems, setTransactionItems] = useState([]);
-  const fetchTransactionItems = async () => {
-    const { data, error } = await supabase.from("items").select("*");
-    if (error) console.log(error);
-    else setTransactionItems(data);
-  };
 
   const [depos, setDepos] = useState([]);
   const fetchDepos = async () => {
@@ -71,6 +67,19 @@ const TransactionForm = () => {
   };
 
   const addTransactionItem = async (transactionId, code, name, unit, qty, price, totalPrice) => {
+    setTransactionItems((prevItems) => [
+      ...prevItems,
+      {
+        transactionId,
+        code,
+        name,
+        unit,
+        qty,
+        price,
+        totalPrice,
+      },
+    ]);
+
     const { data, error } = await supabase.from("items").insert([
       {
         transactionId,
@@ -83,21 +92,24 @@ const TransactionForm = () => {
       },
     ]);
     if (error) console.log(error);
-    else {
-      fetchTransactionItems();
-    }
   };
-  
-  const handleDeleteItem = async (code) => {
-    const { error } = await supabase
-    .from('items')
-    .delete()
-    .eq('code', code)
-    if (error) console.log(error);
-    else fetchTransactionItems();
-  }
+
+  const handleDeleteItem = (code) => {
+    setTransactionItems((prevItems) => prevItems.filter((item) => item.code !== code));
+  };
 
   const handleAddTransactions = async () => {
+    if (!depoOrigin || !depoDestination || !description) {
+      alert("Lengkapi form terlebih dahulu");
+      return;
+    }
+    if (transactionItems.length === 0) {
+      alert("Tambahkan obat terlebih dahulu");
+      return;
+    }
+
+    console.log(transactionItems.length);
+
     const { data, error } = await supabase.from("transactions").insert([
       {
         id,
@@ -113,24 +125,51 @@ const TransactionForm = () => {
       setDepoOrigin("");
       setDepoDestination("");
       setDescription("");
+      setTransactionItems([]);
       fetchTransactions();
     }
 
-    handleClose();
+    setOpen(false);
     window.location.reload();
   };
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    if (depoOrigin || depoDestination || description || transactionItems.length > 0) {
+      if (!window.confirm("Perubahan yang belum disimpan akan hilang, apakah Anda yakin?")) {
+        return;
+      }
+    }
+    setDepoOrigin("");
+    setDepoDestination("");
+    setDescription("");
+    setTransactionItems([]);
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    let total = 0;
+    transactionItems.forEach((item) => {
+      if (item.transactionId === id) {
+        total += item.totalPrice;
+      }
+    });
+    setTotalPrice(total);
+  }, [transactionItems, id]);
 
   return (
     <>
       <Button variant="contained" onClick={handleOpen}>
         Buat Transaksi
       </Button>
-      <Dialog fullWidth maxWidth="xl" open={open} onClose={handleClose}>
-        <DialogTitle>{"Form Perpindahan Obat"}</DialogTitle>
+      <Dialog fullWidth maxWidth="xl" open={open}>
+        <DialogTitle>
+          {"Form Perpindahan Obat"}
+          <IconButton aria-label="close" onClick={handleClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           <DrugForm transactionId={id} addTransactionItem={addTransactionItem} />
           <Grid container spacing={2}>
@@ -192,7 +231,6 @@ const TransactionForm = () => {
               <TableBody>
                 {transactionItems.map((item) => {
                   if (item.transactionId === id) {
-                    totalPrice = totalPrice + item.totalPrice;
                     return (
                       <TableRow key={item.code}>
                         <TableCell>{item.code}</TableCell>

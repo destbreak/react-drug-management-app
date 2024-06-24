@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -14,9 +15,10 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const TransactionDetail = ({ id }) => {
-  let idr = Intl.NumberFormat("id-ID");
+  const idr = Intl.NumberFormat("id-ID");
 
   useEffect(() => {
     fetchTransactions();
@@ -46,8 +48,13 @@ const TransactionDetail = ({ id }) => {
       <Button variant="contained" onClick={handleOpen}>
         Rincian
       </Button>
-      <Dialog fullWidth maxWidth="xl" open={open} onClose={handleClose}>
-        <DialogTitle>{"Rincian Transaksi Perpindahan Obat"}</DialogTitle>
+      <Dialog fullWidth maxWidth="xl" open={open}>
+        <DialogTitle>
+          {"Rincian Transaksi Perpindahan Obat"}
+          <IconButton aria-label="close" onClick={handleClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           {transactions.map((transaction) => {
             if (transaction.id === id) {
