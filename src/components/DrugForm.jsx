@@ -7,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -15,11 +16,13 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const DrugForm = ({ transactionId, addTransactionItem }) => {
-  let idr = Intl.NumberFormat("id-ID");
+  const idr = Intl.NumberFormat("id-ID");
 
   const [inputValue, setInputValue] = useState("");
+  const [selectedDrugs, setSelectedDrugs] = useState([]);
 
   useEffect(() => {
     fetchDrugs();
@@ -32,29 +35,37 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
     else setDrugs(data);
   };
 
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [unit, setUnit] = useState("");
   const [qty, setQty] = useState(1);
-  const [price, setPrice] = useState("");
-  const totalPrice = qty * price;
-
-  const handleChangeQty = (event) => {
-    setQty(parseInt(event.target.value));
+  const handleChangeQty = (index, value) => {
+    const updatedDrugs = [...selectedDrugs];
+    updatedDrugs[index].qty = value;
+    setSelectedDrugs(updatedDrugs);
   };
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [showButton, setShowButton] = useState(true);
-  const [readOnlyText, setReadOnlyText] = useState(false);
-  const toggleButton = () => setShowButton(!showButton);
-  const toggleReadOnlyText = () => setReadOnlyText(!readOnlyText);
+  const handleAddDrug = () => {
+    const selectedDrug = drugs.find((drug) => drug.name === inputValue);
+    if (selectedDrug) {
+      setSelectedDrugs([...selectedDrugs, { ...selectedDrug, qty, totalPrice: qty * selectedDrug.price }]);
+      setInputValue("");
+      setQty(1);
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    addTransactionItem(transactionId, code, name, unit, qty, price, totalPrice);
+    if (selectedDrugs.length === 0) {
+      alert("Obat harus ditambah terlebih dahulu");
+      return;
+    }
+    selectedDrugs.forEach((drug) => {
+      addTransactionItem(transactionId, drug.id, drug.name, drug.unit, drug.qty, drug.price, drug.totalPrice);
+    });
+    setSelectedDrugs([]);
+    handleClose();
   };
 
   return (
@@ -62,8 +73,13 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
       <Button variant="contained" onClick={handleOpen}>
         Tambah Obat
       </Button>
-      <Dialog fullWidth maxWidth="l" open={open} onClose={handleClose}>
-        <DialogTitle>{"Daftar Obat"}</DialogTitle>
+      <Dialog fullWidth maxWidth="l" open={open}>
+        <DialogTitle>
+          {"Daftar Obat"}
+          <IconButton aria-label="close" onClick={handleClose} sx={{ position: "absolute", right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           <Autocomplete
             freeSolo
@@ -95,54 +111,41 @@ const DrugForm = ({ transactionId, addTransactionItem }) => {
                         <TableCell>{drug.id}</TableCell>
                         <TableCell>{drug.name}</TableCell>
                         <TableCell>{drug.unit}</TableCell>
-                        <TableCell>
-                          <TextField
-                            type="number"
-                            InputProps={{ inputProps: { min: 1 }, readOnly: readOnlyText }}
-                            value={qty}
-                            onChange={(event) => {
-                              handleChangeQty(event);
-                            }}
-                            label="Banyak Barang"
-                          />
-                        </TableCell>
+                        <TableCell>-</TableCell>
                         <TableCell>{idr.format(drug.price)}</TableCell>
-                        <TableCell>{idr.format(qty * drug.price)}</TableCell>
                         <TableCell>
-                          {showButton && (
-                            <Button
-                              variant="contained"
-                              onClick={() => {
-                                setCode(drug.id);
-                                setName(drug.name);
-                                setUnit(drug.unit);
-                                setPrice(drug.price);
-                                toggleButton();
-                                toggleReadOnlyText();
-                              }}>
-                              Tambah Obat
-                            </Button>
-                          )}
+                          <Button variant="contained" onClick={handleAddDrug}>
+                            Tambah
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
                   }
                 })}
+                {selectedDrugs.map((drug, index) => (
+                  <TableRow key={drug.id}>
+                    <TableCell>{drug.id}</TableCell>
+                    <TableCell>{drug.name}</TableCell>
+                    <TableCell>{drug.unit}</TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        InputProps={{ inputProps: { min: 1 } }}
+                        value={drug.qty}
+                        onChange={(event) => handleChangeQty(index, parseInt(event.target.value))}
+                        label="Banyak Barang"
+                      />
+                    </TableCell>
+                    <TableCell>{idr.format(drug.price)}</TableCell>
+                    <TableCell>{idr.format(drug.qty * drug.price)}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         </DialogContent>
         <DialogActions style={styles.dialogActions}>
-          <Button
-            variant="contained"
-            onClick={(event) => {
-              handleSubmit(event);
-              setInputValue("");
-              setQty(1);
-              toggleButton();
-              toggleReadOnlyText();
-              handleClose();
-            }}>
+          <Button variant="contained" onClick={handleSubmit}>
             Simpan Obat
           </Button>
         </DialogActions>
